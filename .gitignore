@@ -1,0 +1,9 @@
+docker/docker-data/*
+!docker/docker-data/.gitkeep
+docker/.env
+app/invalid_orders.txt
+
+docker/caddy/data/*
+!docker/caddy/data/.gitkeep
+docker/caddy/config/*
+!docker/caddy/config/.gitkeep

@@ -1,0 +1,14 @@
+{$SITE_DOMAIN:localhost} {
+    # Корневая папка с вашим проектом (замените на свой путь)
+    root * /var/www/app
+
+    # Включает сжатие ответов (Gzip, Zstd)
+    encode gzip zstd
+
+    # Настройка PHP-FPM (для Linux/macOS обычно используется unix-сокет)
+    php_fastcgi php:9000
+
+    # Обработка статики и красивых URL (фронт-контроллер)
+    file_server
+}
+

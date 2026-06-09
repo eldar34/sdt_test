@@ -1,0 +1,65 @@
+name: "${COMPOSE_PROJECT_NAME:-sdt-docker}"
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: ${CONTAINER_NAME:-sdt-model}-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./../app:/var/www/app
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    env_file:
+      - .env 
+    depends_on:
+      - php
+    networks:
+      - sdt-model-network
+
+  php:
+    user: "${UID:-1000}:${GID:-1000}"
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+      args:
+        - PHP_UID=${UID:-1000}
+        - PHP_GID=${GID:-1000}
+    container_name: ${CONTAINER_NAME:-sdt-model}-php
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./../app:/var/www/app
+    networks:
+      - sdt-model-network
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    env_file:
+      - .env  
+    volumes:
+      - ${DB_PGSQL_PATH:-./docker-data/dockDB/pgsql-data/}:/var/lib/postgresql/data:rw
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - sdt-model-network
+
+  adminer:
+    image: adminer
+    container_name: ${CONTAINER_NAME:-sdt-model}-adminer
+    restart: unless-stopped
+    env_file:
+      - .env  
+    ports: 
+        - ${ADMINER_PORT:-7011}:8080
+    networks:
+        - sdt-model-network
+
+networks:
+  sdt-model-network:
+    driver: bridge
